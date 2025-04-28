@@ -1,14 +1,13 @@
 {
   "name": "open-sast-ai",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "AI-powered Static Application Security Testing",
   "main": "bin/open-sast-ai.js",
   "bin": {
     "open-sast-ai": "./bin/open-sast-ai.js"
   },
   "scripts": {
-    "start": "node bin/open-sast-ai.js",
-    "test": "jest"
+    "start": "node bin/open-sast-ai.js"
   },
   "author": "",
   "license": "ISC",
@@ -16,9 +15,6 @@
     "simple-git": "^3.22.0",
     "dotenv": "^16.4.0",
     "openai": "^4.0.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0"
   },
   "packageManager": "yarn@4.0.0",
   "engines": {

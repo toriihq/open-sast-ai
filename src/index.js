@@ -3,6 +3,16 @@ const OpenAI = require('openai');
 const securityScanPrompt = require('./prompt');
 
 class SecurityScanner {
+    model = 'gpt-4.1-nano'
+    // Cost per 1K tokens (in USD)
+    tokenCosts = {
+        'gpt-4.1-nano': { input: 0.00010, output: 0.00040 },
+        'o4-mini': { input: 0.00015, output: 0.0006 },
+        'gpt-4': { input: 0.03, output: 0.06 },
+        'gpt-4-turbo-preview': { input: 0.01, output: 0.03 },
+        'gpt-3.5-turbo': { input: 0.0005, output: 0.0015 }
+    }
+
     constructor(apiKey) {
         if (!apiKey) {
             throw new Error('OpenAI API key is required');
@@ -75,6 +85,8 @@ class SecurityScanner {
     }
 
     async analyzeSecurity(fileContents) {
+        const startTime = process.hrtime();
+        
         const messages = [
             { role: "system", content: securityScanPrompt },
             { role: "user", content: `Please analyze the following code changes:\n\n${JSON.stringify(fileContents, null, 2)}` }
@@ -82,10 +94,28 @@ class SecurityScanner {
 
         try {
             const completion = await this.openai.chat.completions.create({
-                model: "gpt-4o",
+                model: this.model,
                 messages: messages,
-                temperature: 0.3,
+                temperature: 1
             });
+
+            const [seconds, nanoseconds] = process.hrtime(startTime);
+            const timeInMs = (seconds * 1000 + nanoseconds / 1000000).toFixed(2);
+
+            // Calculate costs based on token usage
+            const tokenUsage = completion.usage;
+            const modelCosts = this.tokenCosts[this.model] || { input: 0, output: 0 };
+            const inputCost = (tokenUsage.prompt_tokens / 1000) * modelCosts.input;
+            const outputCost = (tokenUsage.completion_tokens / 1000) * modelCosts.output;
+            const totalCost = inputCost + outputCost;
+
+            console.log('\nAssessment Metrics:');
+            console.log('------------------');
+            console.log(`Time taken: ${timeInMs}ms`);
+            console.log(`Input tokens: ${tokenUsage.prompt_tokens}`);
+            console.log(`Output tokens: ${tokenUsage.completion_tokens}`);
+            console.log(`Total tokens: ${tokenUsage.total_tokens}`);
+            console.log(`Estimated cost: $${totalCost.toFixed(4)}`);
 
             return completion.choices[0].message.content;
         } catch (error) {
@@ -94,6 +124,8 @@ class SecurityScanner {
     }
 
     async scan() {
+        const startTime = process.hrtime();
+        
         const changedFiles = await this.getChangedFiles();
 
         // Log changed files before analysis
@@ -106,11 +138,21 @@ class SecurityScanner {
         if (Object.keys(changedFiles).length === 0) {
             return {
                 changedFiles: {},
-                analysis: null
+                analysis: null,
+                metrics: {
+                    timeTaken: 0,
+                    tokenUsage: null,
+                    estimatedCost: 0
+                }
             };
         }
         
         const analysis = await this.analyzeSecurity(changedFiles);
+        
+        const [seconds, nanoseconds] = process.hrtime(startTime);
+        const totalTimeInMs = (seconds * 1000 + nanoseconds / 1000000).toFixed(2);
+        
+        console.log(`\nTotal scan time: ${totalTimeInMs}ms`);
         
         return {
             changedFiles,

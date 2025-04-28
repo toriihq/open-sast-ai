@@ -12,12 +12,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "simple-git": "^3.22.0",
     "dotenv": "^16.4.0",
-    "openai": "^4.0.0"
+    "openai": "^4.0.0",
+    "simple-git": "^3.22.0"
   },
   "packageManager": "yarn@4.0.0",
   "engines": {
     "node": ">=16"
+  },
+  "devDependencies": {
+    "standard": "^17.1.2"
   }
 }

@@ -109,8 +109,8 @@ class SecurityScanner {
       // Calculate costs based on token usage
       const tokenUsage = completion.usage
       const modelCosts = this.tokenCosts[this.model] || { input: 0, output: 0 }
-      const inputCost = (tokenUsage.prompt_tokens / 1000) * modelCosts.input
-      const outputCost = (tokenUsage.completion_tokens / 1000) * modelCosts.output
+      const inputCost = (tokenUsage.prompt_tokens / 1000000) * modelCosts.input
+      const outputCost = (tokenUsage.completion_tokens / 1000000) * modelCosts.output
       const totalCost = inputCost + outputCost
 
       console.log('\nAssessment Metrics:')

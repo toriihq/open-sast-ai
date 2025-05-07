@@ -9,12 +9,20 @@ if (!OPENAI_API_KEY) {
   console.error('Error: OPENAI_API_KEY environment variable is required')
   process.exit(1)
 }
+console.log('✅ OPENAI_API_KEY found')
+
+// Get optional COMPARE_TO value
+const COMPARE_TO = process.env.COMPARE_TO || 'master'
+console.log(`✅ Comparing to branch: ${COMPARE_TO}`)
 
 async function main () {
   try {
     console.log('Scanning changed files for security vulnerabilities...')
 
-    const scanner = new SecurityScanner(OPENAI_API_KEY)
+    const scanner = new SecurityScanner({ 
+      apiKey: OPENAI_API_KEY,
+      compareTo: COMPARE_TO
+    })
     const { changedFiles, analysis } = await scanner.scan()
 
     if (Object.keys(changedFiles).length === 0) {
@@ -26,6 +34,7 @@ async function main () {
     console.log('\nSecurity Analysis Results:')
     console.log('------------------------')
     console.log(analysis)
+    console.log('\n✅ Analysis complete')
   } catch (error) {
     console.error('Error:', error.message)
     process.exit(1)

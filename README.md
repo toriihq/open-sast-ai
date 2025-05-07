@@ -17,6 +17,12 @@ You can run the tool directly without installation using npx and supplying your 
 OPENAI_API_KEY=your-api-key-here npx open-sast-ai
 ```
 
+For comparing changes against a specific branch (defaults to 'master' if not specified):
+
+```bash
+OPENAI_API_KEY=your-api-key-here COMPARE_TO=main npx open-sast-ai
+```
+
 ## Development
 
 Install dependencies:
@@ -31,6 +37,7 @@ Create a `.env` file in the root directory with your OpenAI API key:
 
 ```
 OPENAI_API_KEY=your-api-key-here
+COMPARE_TO=branch-name  # Optional: Compare changes against a specific branch (default: 'master')
 ```
 
 ## Usage

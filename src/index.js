@@ -12,29 +12,33 @@ class SecurityScanner {
     'gpt-4-turbo-preview': { input: 10, output: 30 },
     'gpt-3.5-turbo': { input: 0.50, output: 1.50 }
   }
+  compareTo = null
 
-  constructor (apiKey) {
-    if (!apiKey) {
+  constructor (options = {}) {
+    if (!options.apiKey) {
       throw new Error('OpenAI API key is required')
     }
 
-    this.openai = new OpenAI({
-      apiKey
-    })
+    if (!options.compareTo) {
+        throw new Error('compareTo is required')
+      }
+  
+    this.openai = new OpenAI({ apiKey: options.apiKey })
+    this.compareTo = options.compareTo
   }
 
   async getChangedFiles () {
     const git = simpleGit()
 
     try {
-      console.log('Getting changes in current branch')
+      console.log(`Getting changes in current branch compared to ${this.compareTo}...`)
 
       // Get the current branch name
       const branchInfo = await git.branch()
       const currentBranch = branchInfo.current
 
-      // Find the commit where the branch diverged from master
-      const mergeBase = await git.raw(['merge-base', 'master', currentBranch])
+      // Find the commit where the branch diverged from compared branch
+      const mergeBase = await git.raw(['merge-base', this.compareTo, currentBranch])
       const baseCommit = mergeBase.trim()
 
       // Get all changes since the branch diverged
@@ -78,7 +82,7 @@ class SecurityScanner {
       return changedFiles
     } catch (error) {
       if (error.message.includes('merge-base')) {
-        throw new Error('Could not determine branch divergence point. Make sure the master branch exists and you have access to it.')
+        throw new Error(`Could not determine branch divergence point. Make sure the ${this.compareTo} branch exists and you have access to it.`)
       }
       throw new Error(`Error getting changed files: ${error.message}`)
     }

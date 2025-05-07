@@ -5,11 +5,21 @@ A powerful Static Application Security Testing (SAST) tool that uses OpenAI to a
 ## Features
 
 - Analyzes changed files in your git repository
-- Uses OpenAI's GPT-4 to identify potential security issues
+- Uses OpenAI's models to identify potential security issues
 - Provides detailed security analysis with severity levels and recommended fixes
 - Easy to integrate into your development workflow
 
-## Installation
+## Usage
+
+You can run the tool directly without installation using npx and supplying your own OpenAPI key:
+
+```bash
+OPENAI_API_KEY=your-api-key-here npx open-sast-ai
+```
+
+## Development
+
+Install dependencies:
 
 ```bash
 yarn install
@@ -29,13 +39,6 @@ Run the security scan on your changed files:
 
 ```bash
 yarn start
-```
-
-Or if installed globally:
-
-```bash
-yarn global add open-sast-ai
-open-sast-ai
 ```
 
 The tool will:
@@ -59,4 +62,4 @@ The tool checks for various security concerns including:
 
 ## License
 
-ISC 
+ISC

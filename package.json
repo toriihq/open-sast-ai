@@ -1,6 +1,6 @@
 {
   "name": "open-sast-ai",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "AI-powered Static Application Security Testing",
   "main": "bin/open-sast-ai.js",
   "bin": {
@@ -11,6 +11,10 @@
   },
   "author": "",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toriihq/open-sast-ai"
+  },
   "dependencies": {
     "dotenv": "^16.4.0",
     "openai": "^4.0.0",

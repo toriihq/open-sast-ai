@@ -31,9 +31,14 @@ class SecurityScanner {
     const git = simpleGit()
 
     try {
-      console.log(`Getting patch compared to branch ${this.compareTo}...`)
+      console.log(`Getting merge-base from branch ${this.compareTo}...`)
+      const base = await git.raw(['merge-base', 'HEAD', this.compareTo]);
+      console.log(`Got the merge base: ${base}`)
 
-      const patch = await git.diff(['--patch', this.compareTo]);
+      console.log(`Getting patch compared to branch ${this.compareTo}...`)
+      const patch = await git.diff(['--patch', `${base.trim()}..HEAD`]);
+      console.log(`Got the patch`)
+
       return patch
     } catch (error) {
       throw new Error(`Error getting patch: ${error.message}`)

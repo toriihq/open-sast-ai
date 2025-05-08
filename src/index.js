@@ -27,73 +27,25 @@ class SecurityScanner {
     this.compareTo = options.compareTo
   }
 
-  async getChangedFiles () {
+  async getPatch () {
     const git = simpleGit()
 
     try {
-      console.log(`Getting changes in current branch compared to ${this.compareTo}...`)
+      console.log(`Getting patch compared to branch ${this.compareTo}...`)
 
-      // Get the current branch name
-      const branchInfo = await git.branch()
-      const currentBranch = branchInfo.current
-
-      // Find the commit where the branch diverged from compared branch
-      const mergeBase = await git.raw(['merge-base', this.compareTo, currentBranch])
-      const baseCommit = mergeBase.trim()
-
-      // Get all changes since the branch diverged
-      const diff = await git.diffSummary([baseCommit])
-      const changedFiles = {}
-
-      // Process each file change
-      for (const file of diff.files) {
-        // Only include TypeScript and JavaScript files
-        if (!/\.(ts|tsx|js|jsx)$/.test(file.file)) continue
-
-        try {
-          // Get the full diff for this file since branch creation
-          const fileDiff = await git.diff([baseCommit, '--', file.file])
-          changedFiles[file.file] = fileDiff
-        } catch (error) {
-          throw new Error(`Error getting diff for ${file.file}: ${error.message}`)
-        }
-      }
-
-      // Also get any uncommitted changes
-      const status = await git.status()
-      const uncommittedFiles = [
-        ...status.modified,
-        ...status.created,
-        ...status.renamed.map(f => f.to)
-      ].filter(file => /\.(ts|tsx|js|jsx)$/.test(file)) // Filter for TS/JS files
-
-      // Add uncommitted changes to the result
-      for (const file of uncommittedFiles) {
-        if (!changedFiles[file]) { // Only if not already included
-          try {
-            const fileDiff = await git.diff(['--', file])
-            changedFiles[file] = fileDiff
-          } catch (error) {
-            throw new Error(`Error getting diff for ${file}: ${error.message}`)
-          }
-        }
-      }
-
-      return changedFiles
+      const patch = await git.diff(['--patch', this.compareTo]);
+      return patch
     } catch (error) {
-      if (error.message.includes('merge-base')) {
-        throw new Error(`Could not determine branch divergence point. Make sure the ${this.compareTo} branch exists and you have access to it.`)
-      }
-      throw new Error(`Error getting changed files: ${error.message}`)
+      throw new Error(`Error getting patch: ${error.message}`)
     }
   }
 
-  async analyzeSecurity (fileContents) {
+  async analyzeSecurity (patch) {
     const startTime = process.hrtime()
 
     const messages = [
       { role: 'system', content: securityScanPrompt },
-      { role: 'user', content: `Please analyze the following code changes:\n\n${JSON.stringify(fileContents, null, 2)}` }
+      { role: 'user', content: `Please analyze the following code changes:\n\n${patch}` }
     ]
 
     try {
@@ -130,28 +82,9 @@ class SecurityScanner {
   async scan () {
     const startTime = process.hrtime()
 
-    const changedFiles = await this.getChangedFiles()
+    const patch = await this.getPatch()
 
-    // Log changed files before analysis
-    console.log('\nChanged Files:')
-    console.log('-------------')
-    for (const file of Object.keys(changedFiles)) {
-      console.log(file)
-    }
-
-    if (Object.keys(changedFiles).length === 0) {
-      return {
-        changedFiles: {},
-        analysis: null,
-        metrics: {
-          timeTaken: 0,
-          tokenUsage: null,
-          estimatedCost: 0
-        }
-      }
-    }
-
-    const analysis = await this.analyzeSecurity(changedFiles)
+    const analysis = await this.analyzeSecurity(patch)
 
     const [seconds, nanoseconds] = process.hrtime(startTime)
     const totalTimeInMs = (seconds * 1000 + nanoseconds / 1000000).toFixed(2)
@@ -159,7 +92,6 @@ class SecurityScanner {
     console.log(`\nTotal scan time: ${totalTimeInMs}ms`)
 
     return {
-      changedFiles,
       analysis
     }
   }

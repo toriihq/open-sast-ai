@@ -23,12 +23,7 @@ async function main () {
       apiKey: OPENAI_API_KEY,
       compareTo: COMPARE_TO
     })
-    const { changedFiles, analysis } = await scanner.scan()
-
-    if (Object.keys(changedFiles).length === 0) {
-      console.log('\nNo files have been changed.')
-      return
-    }
+    const { analysis } = await scanner.scan()
 
     // Log analysis results
     console.log('\nSecurity Analysis Results:')

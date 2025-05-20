@@ -12,6 +12,7 @@ class SecurityScanner {
     'gpt-4-turbo-preview': { input: 10, output: 30 },
     'gpt-3.5-turbo': { input: 0.50, output: 1.50 }
   }
+  temperature = 0
   compareTo = null
 
   constructor (options = {}) {
@@ -20,8 +21,12 @@ class SecurityScanner {
     }
 
     if (!options.compareTo) {
-        throw new Error('compareTo is required')
-      }
+      throw new Error('compareTo is required')
+    }
+
+    if (options.temperature) {
+      this.temperature = options.temperature
+    }
   
     this.openai = new OpenAI({ apiKey: options.apiKey })
     this.compareTo = options.compareTo
@@ -57,7 +62,7 @@ class SecurityScanner {
       const completion = await this.openai.chat.completions.create({
         model: this.model,
         messages,
-        temperature: 1
+        temperature: this.temperature
       })
 
       const [seconds, nanoseconds] = process.hrtime(startTime)

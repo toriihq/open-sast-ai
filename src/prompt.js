@@ -4,7 +4,8 @@ You will be sent code, which you should assess for potential vulnerabilities bas
 
 Output vulnerabilities found as a numbered list, each item in the list should be in this format:
 <details>
-  <summary>Vulnerability: [Vulnerability Name]</summary>
+  <summary>[Vulnerability Number] Vulnerability: [Vulnerability Name]</summary>
+
   - Vulnerability: [Vulnerability Name]
   - File: [File Name]
   - Line: [Line Number from code]
